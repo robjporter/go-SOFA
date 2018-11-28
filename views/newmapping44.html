@@ -1,0 +1,273 @@
+
+<script>
+  function scroll_to_class(element_class, removed_height) {
+    var scroll_to = $(element_class).offset().top - removed_height;
+    if($(window).scrollTop() != scroll_to) {
+        $('html, body').stop().animate({scrollTop: scroll_to}, 0);
+    }
+}
+
+function bar_progress(progress_line_object, direction) {
+    var number_of_steps = progress_line_object.data('number-of-steps');
+    var now_value = progress_line_object.data('now-value');
+    var new_value = 0;
+    if(direction == 'right') {
+        new_value = now_value + ( 100 / number_of_steps );
+    }
+    else if(direction == 'left') {
+        new_value = now_value - ( 100 / number_of_steps );
+    }
+    progress_line_object.attr('style', 'width: ' + new_value + '%;').data('now-value', new_value);
+}
+
+jQuery(document).ready(function() {
+
+    /*
+        Fullscreen background
+    */
+    $.backstretch("assets/img/backgrounds/1.jpg");
+
+    $('#top-navbar-1').on('shown.bs.collapse', function(){
+        $.backstretch("resize");
+    });
+    $('#top-navbar-1').on('hidden.bs.collapse', function(){
+        $.backstretch("resize");
+    });
+
+    /*
+        Form
+    */
+    $('.f1 fieldset:first').fadeIn('slow');
+
+    $('.f1 input[type="text"], .f1 input[type="password"], .f1 textarea').on('focus', function() {
+        $(this).removeClass('input-error');
+    });
+
+    // next step
+    $('.f1 .btn-next').on('click', function() {
+        var parent_fieldset = $(this).parents('fieldset');
+        var next_step = true;
+        // navigation steps / progress steps
+        var current_active_step = $(this).parents('.f1').find('.f1-step.active');
+        var progress_line = $(this).parents('.f1').find('.f1-progress-line');
+
+        // fields validation
+        parent_fieldset.find('input[type="text"], input[type="password"], textarea').each(function() {
+            if( $(this).val() == "" ) {
+                $(this).addClass('input-error');
+                next_step = false;
+            }
+            else {
+                $(this).removeClass('input-error');
+            }
+        });
+        // fields validation
+
+        if( next_step ) {
+            parent_fieldset.fadeOut(400, function() {
+                // change icons
+                current_active_step.removeClass('active').addClass('activated').next().addClass('active');
+                // progress bar
+                bar_progress(progress_line, 'right');
+                // show next step
+                $(this).next().fadeIn();
+                // scroll window to beginning of the form
+                scroll_to_class( $('.f1'), 20 );
+            });
+        }
+
+    });
+
+    // previous step
+    $('.f1 .btn-previous').on('click', function() {
+        // navigation steps / progress steps
+        var current_active_step = $(this).parents('.f1').find('.f1-step.active');
+        var progress_line = $(this).parents('.f1').find('.f1-progress-line');
+
+        $(this).parents('fieldset').fadeOut(400, function() {
+            // change icons
+            current_active_step.removeClass('active').prev().removeClass('activated').addClass('active');
+            // progress bar
+            bar_progress(progress_line, 'left');
+            // show previous step
+            $(this).prev().fadeIn();
+            // scroll window to beginning of the form
+            scroll_to_class( $('.f1'), 20 );
+        });
+    });
+
+    // submit
+    $('.f1').on('submit', function(e) {
+
+        // fields validation
+        $(this).find('input[type="text"], input[type="password"], textarea').each(function() {
+            if( $(this).val() == "" ) {
+                e.preventDefault();
+                $(this).addClass('input-error');
+            }
+            else {
+                $(this).removeClass('input-error');
+            }
+        });
+        // fields validation
+
+    });
+
+});
+</script>
+<script src="public/js/backscratch.js"></script>
+<style>
+  .top-content { padding: 40px 0 170px 0; }
+
+.top-content .text { color: #fff; }
+.top-content .text h1 { color: #fff; }
+.top-content .description { margin: 20px 0 10px 0; }
+.top-content .description p { opacity: 0.8; }
+.top-content .description a { color: #fff; }
+.top-content .description a:hover,
+.top-content .description a:focus { border-bottom: 1px dotted #fff; }
+
+.form-box { padding-top: 40px; }
+
+.f1 {
+	padding: 25px; background: #fff;
+	-moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px;
+}
+.f1 h3 { margin-top: 0; margin-bottom: 5px; text-transform: uppercase; }
+
+.f1-steps { overflow: hidden; position: relative; margin-top: 20px; }
+
+.f1-progress { position: absolute; top: 24px; left: 0; width: 100%; height: 1px; background: #ddd; }
+.f1-progress-line { position: absolute; top: 0; left: 0; height: 1px; background: #f35b3f; }
+
+.f1-step { position: relative; float: left; width: 25%; padding: 0 5px; }
+
+.f1-step-icon {
+	display: inline-block; width: 40px; height: 40px; margin-top: 4px; background: #ddd;
+	font-size: 16px; color: #fff; line-height: 40px;
+	-moz-border-radius: 50%; -webkit-border-radius: 50%; border-radius: 50%;
+}
+.f1-step.activated .f1-step-icon {
+	background: #fff; border: 1px solid #f35b3f; color: #f35b3f; line-height: 38px;
+}
+.f1-step.active .f1-step-icon {
+	width: 48px; height: 48px; margin-top: 0; background: #f35b3f; font-size: 22px; line-height: 48px;
+}
+
+.f1-step p { color: #ccc; }
+.f1-step.activated p { color: #f35b3f; }
+.f1-step.active p { color: #f35b3f; }
+
+.f1 fieldset { display: none; text-align: left; }
+
+.f1-buttons { text-align: right; }
+
+.f1 .input-error { border-color: #f35b3f; }
+
+</style>
+<div class="row" style="height:100px"></div>
+<div class="row" style="height:200px">
+  <div class="col-sm" align="center">
+    <div class="card" style="width:50rem;height:30rem">
+      <div class="card-header">
+        <b>New Mapping</b>
+      </div>
+      <div class="card-body">
+
+        <form role="form" action="" method="post" class="f1">
+
+    <h3>Build a new Mapping config</h3>
+    <p>Please complete the following steps</p>
+    <div class="f1-steps">
+        <div class="f1-progress">
+            <div class="f1-progress-line" data-now-value="12.5" data-number-of-steps="4" style="width: 12.5%;"></div>
+        </div>
+        <div class="f1-step active">
+            <div class="f1-step-icon"><i class="fa fa-user"></i></div>
+            <p>Report</p>
+        </div>
+        <div class="f1-step">
+            <div class="f1-step-icon"><i class="fa fa-key"></i></div>
+            <p>Technologies</p>
+        </div>
+        <div class="f1-step">
+            <div class="f1-step-icon"><i class="fa fa-question"></i></div>
+            <p>Regions</p>
+        </div>
+        <div class="f1-step">
+            <div class="f1-step-icon"><i class="fa fa-twitter"></i></div>
+            <p>Export</p>
+        </div>
+    </div>
+
+    <fieldset>
+        <h4>Which report would you like to base the mapping on:</h4>
+        <div class="form-group">
+            <label class="sr-only" for="f1-first-name">Report name</label>
+            <select>
+              {{range $report := .Reports}}
+                <option>{{$report}}</option>
+              {{end}}
+            </select>
+        </div>
+        <div class="f1-buttons">
+            <button type="button" class="btn btn-secondary btn-next">Next</button>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <h4>Identify Interesting Technologies</h4>
+        {{range $tech := .Technologies}}
+          <input type="checkbox" name="{{$tech}}" value="{{$tech}}">{{$tech}}<br>
+        {{end}}
+        <div class="f1-buttons">
+            <button type="button" class="btn btn-secondary btn-previous">Previous</button>
+            <button type="button" class="btn btn-secondary btn-next">Next</button>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <h4>Security question:</h4>
+        <div class="form-group">
+            <label class="sr-only" for="f1-question">Question</label>
+            <input type="text" name="f1-question" placeholder="Question..." class="f1-question form-control" id="f1-question">
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="f1-answer">Answer</label>
+            <input type="text" name="f1-answer" placeholder="Answer..." class="f1-answer form-control" id="f1-answer">
+        </div>
+        <div class="f1-buttons">
+            <button type="button" class="btn btn-previous">Previous</button>
+            <button type="button" class="btn btn-next">Next</button>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <h4>Social media profiles:</h4>
+        <div class="form-group">
+            <label class="sr-only" for="f1-facebook">Facebook</label>
+            <input type="text" name="f1-facebook" placeholder="Facebook..." class="f1-facebook form-control" id="f1-facebook">
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="f1-twitter">Twitter</label>
+            <input type="text" name="f1-twitter" placeholder="Twitter..." class="f1-twitter form-control" id="f1-twitter">
+        </div>
+        <div class="form-group">
+            <label class="sr-only" for="f1-google-plus">Google plus</label>
+            <input type="text" name="f1-google-plus" placeholder="Google plus..." class="f1-google-plus form-control" id="f1-google-plus">
+        </div>
+        <div class="f1-buttons">
+            <button type="button" class="btn btn-previous">Previous</button>
+            <button type="submit" class="btn btn-submit">Submit</button>
+        </div>
+    </fieldset>
+
+</form>
+
+
+        <a href="/" class="btn btn-block btn-primary">Return</a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row" style="height:100px"></div>
