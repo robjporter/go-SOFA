@@ -131,9 +131,33 @@
                 <h4>Identify Interesting Technologies</h4>
                 <input type="hidden" name="step" id="step" value="3"/>
                 <input type="hidden" name="report" id="report" value="{{.Report}}"/>
-                <div class="checkboxContainer">
-                  {{range $tech := .technologies}}
-                    <input type="checkbox" name="{{$tech}}" value="{{$tech}}">{{$tech}}<br>
+
+                <select class="checkboxContainer" name="technologies" id="technologies" multiple>
+                  {{range $tech := .Technologies}}
+                    <option value="{{$tech}}" style="font-size:12px;">{{$tech}}</option>
+                  {{end}}
+                </select>
+                <div class="f1-buttons">
+                    <button type="button" class="btn btn-secondary btn-previous">Previous</button>
+                    <button type="submit" class="btn btn-secondary btn-next">Next</button>
+                </div>
+            {{end}}
+
+            {{if eq .Step "3"}}
+                <h4>Identify Geography Mappings</h4>
+                <input type="hidden" name="step" id="step" value="4"/>
+                <input type="hidden" name="report" id="report" value="{{.Report}}"/>
+                <input type="hidden" name="technologies" id="technologies" value="{{.Technologies}}"/>
+                <input type="hidden" name="securetechnologies" id="securetechnologies" value="{{.SecureTechnologies}}"/>
+
+								<div class="checkboxContainer myform">
+                  {{range $region := .Regions}}
+										<div class="form-group row" style="white-space:nowrap;display:block-inline">
+								      <label class="control-label col-sm-5" for="{{$region}}" style="font-size:11px;font-weight:bold;padding-top:10px">{{$region}}:</label>
+								      <div class="col-sm-7" style="white-space:nowrap;display:block-inline">
+								        <input type="text" class="form-control" id="{{$region}}" placeholder="{{$region}}" name="{{$region}}">
+								      </div>
+								    </div>
                   {{end}}
                 </div>
                 <div class="f1-buttons">
@@ -142,42 +166,24 @@
                 </div>
             {{end}}
 
-            {{if eq .Step "3"}}
-                <h4>Security question:</h4>
-                <div class="form-group">
-                    <label class="sr-only" for="f1-question">Question</label>
-                    <input type="hidden" name="step" id="step" value="4"/>
-                    <input type="text" name="f1-question" placeholder="Question..." class="f1-question form-control" id="f1-question">
-                </div>
-                <div class="form-group">
-                    <label class="sr-only" for="f1-answer">Answer</label>
-                    <input type="text" name="f1-answer" placeholder="Answer..." class="f1-answer form-control" id="f1-answer">
-                </div>
-                <div class="f1-buttons">
-                    <button type="button" class="btn btn-previous">Previous</button>
-                    <button type="submit" class="btn btn-next">Next</button>
-                </div>
-            {{end}}
-
             {{if eq .Step "4"}}
-                <h4>Social media profiles:</h4>
+                <h4>Name & Save Mapping file:</h4>
                 <input type="hidden" name="step" id="step" value="5"/>
-                <div class="form-group">
-                    <label class="sr-only" for="f1-facebook">Facebook</label>
-                    <input type="text" name="f1-facebook" placeholder="Facebook..." class="f1-facebook form-control" id="f1-facebook">
-                </div>
-                <div class="form-group">
-                    <label class="sr-only" for="f1-twitter">Twitter</label>
-                    <input type="text" name="f1-twitter" placeholder="Twitter..." class="f1-twitter form-control" id="f1-twitter">
-                </div>
-                <div class="form-group">
-                    <label class="sr-only" for="f1-google-plus">Google plus</label>
-                    <input type="text" name="f1-google-plus" placeholder="Google plus..." class="f1-google-plus form-control" id="f1-google-plus">
-                </div>
-                <div class="f1-buttons">
-                    <button type="button" class="btn btn-previous">Previous</button>
-                    <button type="submit" class="btn btn-submit">Submit</button>
-                </div>
+                <input type="hidden" name="report" id="report" value="{{.Report}}"/>
+                <input type="hidden" name="regions" id="regions" value="{{.Regions}}"/>
+                <input type="hidden" name="secureregions" id="secureregions" value="{{.SecureRegions}}"/>
+                <input type="hidden" name="selected" id="selected" value="{{.Selected}}"/>
+                <input type="hidden" name="technologies" id="technologies" value="{{.Technologies}}"/>
+                <input type="hidden" name="securetechnologies" id="securetechnologies" value="{{.SecureTechnologies}}"/>
+
+								<div class="form-group row" style="white-space:nowrap;display:block-inline">
+									<label class="control-label col-sm-5" for="mapname" style="font-size:11px;font-weight:bold;padding-top:10px">Map file name:</label>
+									<div class="col-sm-7" style="white-space:nowrap;display:block-inline">
+										<input type="text" class="form-control" id="mapname" placeholder="Map file name" name="mapname">
+									</div>
+								</div>
+
+								<button type="submit" class="btn btn-secondary">Save processed file</button>
             {{end}}
           {{else}}
             <h4>Which report would you like to base the mapping on:</h4>

@@ -5,23 +5,43 @@ import (
 	"io"
 	"os"
 	"fmt"
+  "bytes"
 	"bufio"
 	"strings"
+	"strconv"
+	"io/ioutil"
+  "encoding/gob"
 	"encoding/csv"
+  "encoding/base64"
 	"github.com/kataras/iris"
 )
 
 // GetIndexHandler handles the GET: /
 func PostNewMappingHandler(ctx iris.Context) {
+	technologies := []string{}
+	regions := []string{}
+	selected := []string{}
+
+	securetechnologies := ctx.PostValue("securetechnologies")
+	secureregions := ctx.PostValue("secureregions")
+
 	step := ctx.PostValue("step")
 	report := ctx.PostValue("report")
-	mapping := ctx.PostValue("mapping")
-	technologies := []string{}
-	//technologies = ctx.PostValue("technologies")
+	regions = ctx.FormValues()["regions"]
+	selected = ctx.FormValues()["selected"]
+	technologies = ctx.FormValues()["technologies"]
+	mapName := ctx.PostValue("mapname")
 
-	if(step == "") { fmt.Println("STEP: 1")}
+	if(securetechnologies == "" && technologies != nil) {
+		securetechnologies = ToGOB64(technologies)
+	}
+
+	if(secureregions == "" && selected != nil) {
+		secureregions = ToGOB64(selected)
+	}
+
 	if(step == "2") {
-		mapping = processStep2(report)
+		processStep2(report)
 		technologyFile := getSaveFilename("technology",report)
 		data,err := loadDataFromFile(technologyFile)
 		if(err == nil ) {
@@ -30,23 +50,116 @@ func PostNewMappingHandler(ctx iris.Context) {
 			fmt.Println(err)
 		}
 	}
-	if(step == "3") { fmt.Println("STEP: 3")}
-	if(step == "4") { fmt.Println("STEP: 4")}
 
-	ctx.ViewData("Title", "Index Page")
+	if(step == "3") {
+		geographyFile := getSaveFilename("geography",report)
+		data,err := loadDataFromFile(geographyFile)
+		if(err == nil ) {
+			regions = data
+		} else {
+			fmt.Println(err)
+		}
+	}
+
+	if(step == "4") {
+		geographyFile := getSaveFilename("geography",report)
+		data,err := loadDataFromFile(geographyFile)
+
+		if( err == nil ) {
+			for i := 0; i < len(data); i++ {
+				selected = append(selected, ctx.PostValue(data[i]))
+			}
+			secureregions = ToGOB64(selected)
+		}
+
+	}
+
+	if(step == "5") {
+		err := saveMapFile(report, mapName, secureregions, securetechnologies)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+  		ctx.Redirect("/", iris.StatusSeeOther)
+		}
+	}
+
+	ctx.ViewData("Title", "SOFA - Index Page")
 	ctx.ViewData("Step", step)
 	ctx.ViewData("Report", report)
-	ctx.ViewData("Mapping", mapping)
-	ctx.ViewData("Technolgoies",technologies)
+	ctx.ViewData("Regions", regions)
+	ctx.ViewData("Selected", selected)
+	ctx.ViewData("SecureTechnologies", securetechnologies)
+	ctx.ViewData("SecureRegions", secureregions)
+	ctx.ViewData("Technologies", technologies)
+
 	if err := ctx.View("newmapping.html"); err != nil {
 		ctx.Application().Logger().Infof(err.Error())
 	}
 }
 
-func processStep2(reportName string) string {
+func ToGOB64(m []string) string {
+    b := bytes.Buffer{}
+    e := gob.NewEncoder(&b)
+    err := e.Encode(m)
+    if err != nil { fmt.Println(`failed gob Encode`, err) }
+    return base64.StdEncoding.EncodeToString(b.Bytes())
+}
+
+func FromGOB64(str string) []string {
+    m := []string{}
+    by, err := base64.StdEncoding.DecodeString(str)
+    if err != nil { fmt.Println(`failed base64 Decode`, err); }
+    b := bytes.Buffer{}
+    b.Write(by)
+    d := gob.NewDecoder(&b)
+    err = d.Decode(&m)
+    if err != nil { fmt.Println(`failed gob Decode`, err); }
+    return m
+}
+
+func stripArray(data string) []string {
+	return FromGOB64(data)
+}
+
+func saveMapFile(reportName string, mapName string, selected string, technologies string) error {
+	output := `{"INTERESTING": [`
+
+	// CONVERT ENCODED TECHNOLOGIES TO STRING ARRAY
+	arr := stripArray(technologies)
+
+	// INTERESTING TECHNOLOGIES
+	for i := 0; i < len(arr); i++ {
+		output += `{"name":"`+arr[i]+`"},`
+	}
+	output = strings.TrimRight(output,",")
+	output += `],`
+
+	// CONVERT ENCODED SELECTED TO STRING ARRAY
+	arr = stripArray(selected)
+
+	// LOAD GEORGRAPHY DATA
+	geographyFile := getSaveFilename("geography",reportName)
+	data,err := loadDataFromFile(geographyFile)
+
+	// REGION TO SALES SPECIALIST MAPPING
+	output += `"ALIGNMENT": [`
+	if( err == nil ) {
+		for i := 0; i < len(data); i++ {
+			output += `{"name":"`+data[i]+`","specialist":"`+arr[i]+`"},`
+		}
+	}
+	output = strings.TrimRight(output,",")
+	output += `]`
+
+	// FINISH JSON STRING
+	output += `}`
+
+	return saveConfigFile(mapName,output)
+}
+
+func processStep2(reportName string) {
 	count := loadCSVData("uploads/reports/"+reportName)
-	fmt.Println(count)
-	return ""
+	fmt.Println("Completed successfully processing: " + strconv.Itoa(count) + " records.")
 }
 
 func loadDataFromFile(path string) ([]string, error) {
@@ -91,6 +204,12 @@ func getSaveFilename(typer string, fileName string) string {
 	splitss := strings.TrimPrefix(splits[0],"uploads/reports/")
 	newFileName := "uploads/mappings/" + splitss + "-" + typer + "." + splits[1]
 	return newFileName
+}
+
+func saveConfigFile(mapName string, data string) error {
+  d1 := []byte(data)
+  err := ioutil.WriteFile("uploads/maps/" + mapName + ".json", d1, 0644)
+  return err
 }
 
 func saveValues(data []string, typer string, fileName string) {
