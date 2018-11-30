@@ -18,5 +18,6 @@ func Configure(b *bootstrap.Bootstrapper) {
 	b.Get("/newmapping", GetNewMappingHandler)
 	b.Post("/newmapping", PostNewMappingHandler)
 	b.Get("/processreport", GetProcessReportHandler)
+	b.Post("/processreport", PostProcessReportHandler)
 	b.Post("/upload", iris.LimitRequestBodySize(maxSize+1<<20), PostUpload)
 }

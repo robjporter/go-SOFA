@@ -22,7 +22,7 @@ func GetNewMappingHandler(ctx iris.Context) {
 
   for _, f := range files {
 		if(!f.IsDir()) {
-				reports = append(reports,f.Name())
+				reports = append(reports,removeExtension(f.Name()))
 		}
   }
 	ctx.ViewData("Title", "Index Page")

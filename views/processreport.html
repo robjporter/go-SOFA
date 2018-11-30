@@ -1,1 +1,130 @@
-PROCESS REPORT
+<script src="public/js/backscratch.js"></script>
+
+<div class="row" style="height:100px"></div>
+<div class="row" style="height:200px">
+  <div class="col-sm" align="center">
+    <div class="card" style="width:50rem;height:30rem">
+      <div class="card-header">
+        <b>Process Report</b>
+      </div>
+      <div class="card-body">
+        <form role="form" action="/processreport" method="POST" class="f1">
+          <h3>Process a report</h3>
+          <p>Please complete the following steps</p>
+          <div class="f1-steps">
+              <div class="f1-progress">
+                  <div class="f1-progress-line" data-now-value="12.5" data-number-of-steps="4" style="width: 12.5%;"></div>
+              </div>
+              {{if .Step}}
+                  <div class="f1-step">
+                      <div class="f1-step-icon"></div>
+                      <p>Report</p>
+                  </div>
+                  {{if eq .Step "2"}}
+                    <div class="f1-step active">
+                        <div class="f1-step-icon"></div>
+                        <p>Mapping</p>
+                    </div>
+                  {{else}}
+                    <div class="f1-step">
+                        <div class="f1-step-icon"></div>
+                        <p>Mapping</p>
+                    </div>
+                  {{end}}
+                  {{if eq .Step "3"}}
+                    <div class="f1-step active">
+                        <div class="f1-step-icon"></div>
+                        <p>Process</p>
+                    </div>
+                  {{else}}
+                    <div class="f1-step">
+                        <div class="f1-step-icon"></div>
+                        <p>Process</p>
+                    </div>
+                  {{end}}
+                  {{if eq .Step "4"}}
+                    <div class="f1-step active">
+                        <div class="f1-step-icon"></div>
+                        <p>Export</p>
+                    </div>
+                  {{else}}
+                    <div class="f1-step">
+                        <div class="f1-step-icon"></div>
+                        <p>Export</p>
+                    </div>
+                  {{end}}
+              {{else}}
+                  <div class="f1-step active">
+                      <div class="f1-step-icon"></div>
+                      <p>Report</p>
+                  </div>
+                  <div class="f1-step">
+                      <div class="f1-step-icon"></div>
+                      <p>Mapping</p>
+                  </div>
+                  <div class="f1-step">
+                      <div class="f1-step-icon"></div>
+                      <p>Process</p>
+                  </div>
+                  <div class="f1-step">
+                      <div class="f1-step-icon"></div>
+                      <p>Export</p>
+                  </div>
+              {{end}}
+          </div>
+          {{if .Step}}
+            {{if eq .Step "2"}}
+              <h4>Which map would you like to process:</h4>
+              <div class="form-group">
+                  <label class="sr-only" for="f1-first-name">Map name</label>
+                  <input type="hidden" name="step" id="step" value="3"/>
+                  <input type="hidden" name="report" id="report" value="{{.Report}}"/>
+                  <select name="map" id="map">
+                    {{range $map := .Maps}}
+                      <option>{{$map}}</option>
+                    {{end}}
+                  </select>
+              </div>
+              <div class="f1-buttons">
+                  <button type="submit" class="btn btn-secondary">Next</button>
+              </div>
+            {{end}}
+            {{if eq .Step "3"}}
+              <h4>Confirm report processing:</h4>
+              <input type="hidden" name="step" id="step" value="4"/>
+              <input type="hidden" name="report" id="report" value="{{.Report}}"/>
+              <input type="hidden" name="map" id="map" value="{{.Mapped}}"/>
+              <div class="form-group">
+                Report to process: {{.Report}}</br>
+                Map file to use:   {{.Mapped}}
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Process</button>
+            {{end}}
+            {{if eq .Step "4"}}
+              <h4>Export processed file:</h4>
+              <input type="hidden" name="step" id="step" value="5"/>
+              <input type="hidden" name="output" id="output" value="{{.Output}}"/>
+              <div class="form-group">
+                <button type="submit" class="btn btn-primary btn-block">Save</button>
+              </div>
+            {{end}}
+          {{else}}
+            <h4>Which report would you like to process:</h4>
+            <div class="form-group">
+                <label class="sr-only" for="f1-first-name">Report name</label>
+                <input type="hidden" name="step" id="step" value="2"/>
+                <select name="report" id="report">
+                  {{range $report := .Reports}}
+                    <option>{{$report}}</option>
+                  {{end}}
+                </select>
+            </div>
+            <div class="f1-buttons">
+                <button type="submit" class="btn btn-secondary">Next</button>
+            </div>
+          {{end}}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
