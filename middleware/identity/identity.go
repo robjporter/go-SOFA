@@ -22,6 +22,7 @@ func New(b *bootstrap.Bootstrapper) iris.Handler {
 		// view data if ctx.View or c.Tmpl = "$page.html" will be called next.
 		ctx.ViewData("AppName", b.AppName)
 		ctx.ViewData("AppOwner", b.AppOwner)
+		ctx.ViewData("AppVersion", b.AppVersion)
 		ctx.Next()
 	}
 }

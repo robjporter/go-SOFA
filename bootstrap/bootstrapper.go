@@ -33,6 +33,8 @@ const (
   TLSPort = "443"
   PrometheusServiceName = "serviceName"
   PrometheusURL = "/metrics"
+	Version = "v2"
+	VersionLong = "v2.0.2"
 )
 
 type Configurator func(*Bootstrapper)
@@ -41,6 +43,7 @@ type Bootstrapper struct {
 	*iris.Application
 	AppName      string
 	AppOwner     string
+	AppVersion string
 	AppSpawnDate time.Time
 	Development bool
 	Sessions *sessions.Sessions
@@ -51,6 +54,7 @@ func New(appName, appOwner string, cfgs ...Configurator) *Bootstrapper {
 	b := &Bootstrapper{
 		AppName:      appName,
 		AppOwner:     appOwner,
+		AppVersion: Version,
 		AppSpawnDate: time.Now(),
 		Application:  iris.New(),
 		Development: true,
